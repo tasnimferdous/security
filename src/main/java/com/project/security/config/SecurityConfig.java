@@ -26,7 +26,9 @@ public class SecurityConfig {
         log.info("Configuring security filter chain..");
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth ->
-                        auth.anyRequest().authenticated())
+                        auth
+                                .requestMatchers("/authenticate").permitAll()
+                                .anyRequest().authenticated())
                 .httpBasic(withDefaults());
         return http.build();
     }
