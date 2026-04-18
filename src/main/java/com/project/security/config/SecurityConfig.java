@@ -28,8 +28,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers("/authenticate").permitAll()
-                                .anyRequest().authenticated())
-                .httpBasic(withDefaults());
+                                .anyRequest().authenticated());
         return http.build();
     }
 
