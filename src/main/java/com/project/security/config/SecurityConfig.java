@@ -1,11 +1,13 @@
 package com.project.security.config;
 
+import com.project.security.enums.Permission;
 import com.project.security.filters.JwtAuthenticationFilter;
 import com.project.security.service.CustomUserDetailsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -17,8 +19,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -34,6 +34,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers("/authenticate").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/info/**").hasAuthority(Permission.READ.name())
+                                .requestMatchers(HttpMethod.POST, "/info/**").hasAuthority(Permission.WRITE.name())
+                                .requestMatchers(HttpMethod.DELETE, "/info/**").hasAuthority(Permission.DELETE.name())
                                 .anyRequest().authenticated());
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
