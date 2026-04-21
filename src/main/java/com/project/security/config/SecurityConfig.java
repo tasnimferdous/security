@@ -11,6 +11,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -22,6 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @Slf4j
 public class SecurityConfig {
     @Autowired
@@ -34,9 +36,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers("/authenticate").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/info/**").hasAuthority(Permission.READ.name())
-                                .requestMatchers(HttpMethod.POST, "/info/**").hasAuthority(Permission.WRITE.name())
-                                .requestMatchers(HttpMethod.DELETE, "/info/**").hasAuthority(Permission.DELETE.name())
+//                                .requestMatchers(HttpMethod.GET, "/info/**").hasAuthority(Permission.READ.name())
+//                                .requestMatchers(HttpMethod.POST, "/info/**").hasAuthority(Permission.WRITE.name())
+//                                .requestMatchers(HttpMethod.DELETE, "/info/**").hasAuthority(Permission.DELETE.name())
                                 .anyRequest().authenticated());
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
