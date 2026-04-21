@@ -36,4 +36,16 @@ public class InformationServiceImpl implements InformationService {
         log.info("Retrieving all information");
         return infromationRepository.findAll();
     }
+
+    @Override
+    public String deleteInfo(Long id) {
+        try {
+            infromationRepository.deleteById(id);
+            log.info("Information with id {} deleted successfully", id);
+            return "Information with id " + id + " deleted successfully";
+        } catch (Exception e) {
+            log.error("Exception - ",e);
+            return "Failed to delete information with id " + id + ": " + e.getMessage();
+        }
+    }
 }
