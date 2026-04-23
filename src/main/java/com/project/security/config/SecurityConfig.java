@@ -36,6 +36,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers("/authenticate").permitAll()
+                                .requestMatchers("/user/register").permitAll()
 //                                .requestMatchers(HttpMethod.GET, "/info/**").hasAuthority(Permission.READ.name())
 //                                .requestMatchers(HttpMethod.POST, "/info/**").hasAuthority(Permission.WRITE.name())
 //                                .requestMatchers(HttpMethod.DELETE, "/info/**").hasAuthority(Permission.DELETE.name())
