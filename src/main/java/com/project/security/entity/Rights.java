@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -23,8 +25,7 @@ public class Rights {
     private String name;
     
     private String description;
-    
-    // Inverse side of many-to-many relationship (mappedBy refers to the attribute name in Roles)
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "rights")
-    private Set<Roles> roles;
+
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "rights")
+    private Set<Roles> roles = new HashSet<>();
 }

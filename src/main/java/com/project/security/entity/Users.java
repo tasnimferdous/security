@@ -25,20 +25,35 @@ import java.util.stream.Collectors;
 public class Users implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
     private String username;
     private String password;
-    @Enumerated(EnumType.STRING)
-    private Role role;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_role",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "role_id")
+    )
+    private Set<Roles> role = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<SimpleGrantedAuthority> authorities = new HashSet<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + role.name()));
-        Set<SimpleGrantedAuthority> permissionAuthorities = role.getPermissions().stream()
-                .map(permission -> new SimpleGrantedAuthority(permission.name()))
+
+        Set<SimpleGrantedAuthority> roleAuthorities = role.stream()
+                .map(r -> new SimpleGrantedAuthority("ROLE_" + r.getName()))
                 .collect(Collectors.toSet());
-        authorities.addAll(permissionAuthorities);
+
+        Set<SimpleGrantedAuthority> rightAuthorities = role.stream()
+                .flatMap(r -> r.getRights().stream())
+                .map(right -> new SimpleGrantedAuthority(right.getName()))
+                .collect(Collectors.toSet());
+
+        authorities.addAll(roleAuthorities);
+        authorities.addAll(rightAuthorities);
+
         return authorities;
     }
 
