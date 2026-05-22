@@ -1,21 +1,21 @@
 package com.project.security.repository;
 
-import com.project.security.entity.Users;
+import com.project.security.entity.Roles;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import java.util.Collection;
+import java.util.List;
 
 @Repository
-public interface UserDetailsRepository extends JpaRepository<Users, Long> {
+public interface RoleRepository extends JpaRepository<Roles, Integer> {
     @Query("""
-        select distinct u
-        from Users u
-        left join fetch u.role r
+        select distinct r
+        from Roles r
         left join fetch r.rights
-        where u.username = :username
+        where r.id in :roleIds
     """)
-    Optional<Users> findByUsername(@Param("username") String username);
+    List<Roles> findAllRolesById(@Param("roleIds") Collection<Integer> rolesIds);
 }

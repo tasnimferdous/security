@@ -1,12 +1,15 @@
 package com.project.security.service;
 
+import com.project.security.entity.Rights;
+import com.project.security.entity.Roles;
 import com.project.security.entity.Users;
-import com.project.security.enums.Role;
 import com.project.security.repository.UserDetailsRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.util.Set;
 
 @Component
 public class AdminUserInitializer {
@@ -17,18 +20,16 @@ public class AdminUserInitializer {
                     Users admin = new Users();
                     admin.setUsername("admin");
                     admin.setPassword(passwordEncoder.encode("admin1234"));
-                    admin.setRole(Role.ADMIN);
+                    Rights rights = Rights.builder()
+                            .name("ALL")
+                            .build();
+                    Roles role = Roles.builder()
+                            .name("ADMIN")
+                            .rights(Set.of(rights))
+                            .build();
+                    admin.setRole(Set.of(role));
 
                     userRepository.save(admin);
-                }
-
-                if (userRepository.findByUsername("user").isEmpty()) {
-                    Users user = new Users();
-                    user.setUsername("user");
-                    user.setPassword(passwordEncoder.encode("user1234"));
-                    user.setRole(Role.USER);
-
-                    userRepository.save(user);
                 }
             };
         }
