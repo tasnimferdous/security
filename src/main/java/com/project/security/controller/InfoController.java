@@ -21,21 +21,21 @@ public class InfoController {
     }
 
     @PostMapping("/store")
-    @PreAuthorize(("hasAuthority('WRITE')"))
+    @PreAuthorize(("hasAnyAuthority('ALL', 'WRITE')"))
     public Information storeData(@RequestBody Information information){
         log.info("calling api..");
         return informationService.saveData(information);
     }
 
     @GetMapping("/all")
-    @PreAuthorize("hasAuthority('READ')")
+    @PreAuthorize("hasAnyAuthority('ALL', 'READ')")
     public List<Information> getAllData(){
         log.info("Retrieving all data");
         return informationService.getAll();
     }
 
     @DeleteMapping("/remove/{id}")
-    @PreAuthorize("hasAuthority('DELETE')")
+    @PreAuthorize("hasAnyAuthority('ALL', 'DELETE')")
     public String removeInfo(@PathVariable Long id){
         log.info("Removing information with id: {}", id);
         return informationService.deleteInfo(id);
