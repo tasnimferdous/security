@@ -1,9 +1,9 @@
 package com.project.security.service.Impl;
 
-import com.project.security.dto.UserRequestDto;
-import com.project.security.dto.UserResponseDto;
+import com.project.security.request.UserRequestDto;
+import com.project.security.response.UserResponseDto;
 import com.project.security.entity.Roles;
-import com.project.security.entity.Users;
+import com.project.security.entity.UserInfo;
 import com.project.security.repository.UserDetailsRepository;
 import com.project.security.service.RoleRightService;
 import com.project.security.service.UserService;
@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -38,12 +39,13 @@ public class UserServiceImpl implements UserService {
         try {
             Set<Roles> roles = roleRightService.getRolesByIds(userRequestDto.getRoles());
 
-            Users user = Users.builder()
+            UserInfo user = UserInfo.builder()
+                    .id(UUID.randomUUID().toString())
                     .username(userRequestDto.getUsername())
                     .password(passwordEncoder.encode(userRequestDto.getPassword()))
                     .role(roles)
                     .build();
-            Users savedUser = userDetailsRepository.save(user);
+            UserInfo savedUser = userDetailsRepository.save(user);
             log.info("User registered successfully: {}", savedUser.getUsername());
 
             return UserResponseDto.builder()

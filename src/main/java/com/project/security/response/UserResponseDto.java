@@ -1,4 +1,4 @@
-package com.project.security.dto;
+package com.project.security.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,8 +12,8 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserRequestDto {
+public class UserResponseDto {
+    private String id;
     private String username;
-    private String password;
-    private List<Integer> roles = new ArrayList<>();
+    private List<String> role = new ArrayList<>();
 }
