@@ -18,11 +18,10 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Users implements UserDetails {
+public class UserInfo implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Long id;
+    private String id;
     private String username;
     private String password;
 

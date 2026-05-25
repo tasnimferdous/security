@@ -1,7 +1,10 @@
 package com.project.security.service;
 
-import com.project.security.dto.AuthRequestDto;
+import com.project.security.request.AuthRequestDto;
+import com.project.security.response.AuthResponseDto;
 
 public interface AuthService {
-    String getToken(AuthRequestDto authRequestDto);
+    AuthResponseDto getToken(AuthRequestDto authRequestDto);
+
+    AuthResponseDto authenticateByRefreshToken(String refreshToken);
 }

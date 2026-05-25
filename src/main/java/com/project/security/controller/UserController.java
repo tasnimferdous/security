@@ -1,6 +1,6 @@
 package com.project.security.controller;
 
-import com.project.security.dto.UserRequestDto;
+import com.project.security.request.UserRequestDto;
 import com.project.security.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-package com.project.security.dto;
+package com.project.security.request;
 
 import lombok.Getter;
 import lombok.Setter;
