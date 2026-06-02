@@ -23,23 +23,22 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         this.tokenRepository = tokenRepository;
     }
 
-
-    //Here duplicate entry exception occurs.
-    //I've to fix the issue
     @Override
-    public RefreshToken generateToken(String username){
-        log.info("RefreshTokenService - generateToken - username: {}", username);
+    public RefreshToken generateToken(UserInfo user){
+        log.info("RefreshTokenService - generateToken - username: {}", user.getUsername());
 
-        UserInfo userInfo = customUserDetailsService.findUserByUsername(username);
+        RefreshToken refreshToken = tokenRepository
+                .findByUser(user)
+                .orElseGet(() -> RefreshToken.builder()
+                        .user(user)
+                        .build());
 
-        RefreshToken refreshToken = RefreshToken.builder()
-                .user(userInfo)
-                .token(UUID.randomUUID().toString())
-                .expiryDate(Instant.now().plusSeconds( 24 * 60 * 60))
-                .build();
+        refreshToken.setToken(UUID.randomUUID().toString());
+        refreshToken.setExpiryDate(
+                Instant.now().plusSeconds(24 * 60 * 60)
+        );
 
-        tokenRepository.save(refreshToken);
-        return refreshToken;
+        return tokenRepository.save(refreshToken);
     }
 
     @Override

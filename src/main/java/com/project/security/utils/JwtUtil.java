@@ -1,13 +1,17 @@
 package com.project.security.utils;
 
+import com.project.security.entity.UserInfo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtUtil {
@@ -15,9 +19,16 @@ public class JwtUtil {
     private final String secretKey = "ThisIsASecretKeyForJwtTokenGeneration";
     private final SecretKey SECRET_KEY = Keys.hmacShaKeyFor(secretKey.getBytes());
 
-    public String generateToken(String username){
+    public String generateToken(UserInfo userInfo){
+        List<String> authorities =
+                userInfo.getAuthorities()
+                        .stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .toList();
+
         return Jwts.builder()
-                .subject(username)
+                .subject(userInfo.getUsername())
+                .claim("authorities", authorities)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(SECRET_KEY)
@@ -28,6 +39,16 @@ public class JwtUtil {
         return getClaims(token).getSubject();
     }
 
+    public List<String> extractAuthorities(String token) {
+        List<?> authorities = getClaims(token).get("authorities", List.class);
+        return authorities != null
+            ? authorities.stream()
+                .map(Object::toString)
+                .collect(Collectors.toList())
+            : Collections.emptyList();
+    }
+
+
     private Claims getClaims(String token) {
         return Jwts.parser()
                 .verifyWith(SECRET_KEY)
@@ -36,8 +57,8 @@ public class JwtUtil {
                 .getPayload();
     }
 
-    public boolean validateToken(UserDetails userDetails, String username, String token) {
-        return userDetails.getUsername().equals(username) && !isTokenExpired(token);
+    public boolean validateToken(String token) {
+        return !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {
