@@ -1,6 +1,7 @@
 package com.project.security.service.Impl;
 
 import com.project.security.entity.RefreshToken;
+import com.project.security.entity.UserInfo;
 import com.project.security.request.AuthRequestDto;
 import com.project.security.response.AuthResponseDto;
 import com.project.security.service.AuthService;
@@ -39,8 +40,11 @@ public class AuthServiceImpl implements AuthService {
                 throw new RuntimeException("Invalid username or password");
             }
 
-            String accessToken = jwtUtil.generateToken(authRequestDto.getUsername());
-            RefreshToken refreshToken = refreshTokenService.generateToken(authRequestDto.getUsername());
+            UserInfo userDetails = (UserInfo) authentication.getPrincipal();
+
+            assert userDetails != null;
+            String accessToken = jwtUtil.generateToken(userDetails);
+            RefreshToken refreshToken = refreshTokenService.generateToken(userDetails);
 
             return AuthResponseDto.builder()
                     .accessToken(accessToken)
@@ -59,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
                 .map(refreshTokenService::verifyToken)
                 .map(RefreshToken::getUser)
                 .map(user -> {
-                    String accessToken = jwtUtil.generateToken(user.getUsername());
+                    String accessToken = jwtUtil.generateToken(user);
                     return AuthResponseDto.builder()
                             .accessToken(accessToken)
                             .refreshToken(refreshToken)
