@@ -46,6 +46,8 @@ public class AuthServiceImpl implements AuthService {
             String accessToken = jwtUtil.generateToken(userDetails);
             RefreshToken refreshToken = refreshTokenService.generateToken(userDetails);
 
+            //publish event to Kafka
+
             return AuthResponseDto.builder()
                     .accessToken(accessToken)
                     .refreshToken(refreshToken.getToken())
