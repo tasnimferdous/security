@@ -1,5 +1,6 @@
 package com.project.security.service.Impl;
 
+import com.project.security.event.UserPublisher;
 import com.project.security.request.UserRequestDto;
 import com.project.security.response.UserResponseDto;
 import com.project.security.entity.Roles;
@@ -20,11 +21,13 @@ public class UserServiceImpl implements UserService {
     private final UserDetailsRepository userDetailsRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRightService roleRightService;
+    private final UserPublisher userPublisher;
 
-    public UserServiceImpl(UserDetailsRepository userDetailsRepository, PasswordEncoder passwordEncoder, RoleRightService roleRightService) {
+    public UserServiceImpl(UserDetailsRepository userDetailsRepository, PasswordEncoder passwordEncoder, RoleRightService roleRightService, UserPublisher userPublisher) {
         this.userDetailsRepository = userDetailsRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRightService = roleRightService;
+        this.userPublisher = userPublisher;
     }
 
     @Override
@@ -47,6 +50,9 @@ public class UserServiceImpl implements UserService {
                     .build();
             UserInfo savedUser = userDetailsRepository.save(user);
             log.info("User registered successfully: {}", savedUser.getUsername());
+
+            //publish event to Kafka
+            userPublisher.publishUserInfo(userRequestDto);
 
             return UserResponseDto.builder()
                     .id(savedUser.getId())
