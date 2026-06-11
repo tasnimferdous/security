@@ -15,5 +15,10 @@ import java.util.List;
 public class UserRequestDto {
     private String username;
     private String password;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String contactNumber;
+    private String profilePicture;
     private List<Integer> roles = new ArrayList<>();
 }
