@@ -52,6 +52,7 @@ public class UserServiceImpl implements UserService {
             log.info("User registered successfully: {}", savedUser.getUsername());
 
             //publish event to Kafka
+            userRequestDto.setUserId(savedUser.getId());
             userPublisher.publishUserInfo(userRequestDto);
 
             return UserResponseDto.builder()
