@@ -1,6 +1,6 @@
 package com.project.security.filters;
 
-import com.project.security.service.CustomUserDetailsService;
+import com.project.security.model.UserPrincipal;
 import com.project.security.utils.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,19 +24,16 @@ import java.util.stream.Collectors;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     JwtUtil jwtUtil;
-    @Autowired
-    CustomUserDetailsService customUserDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-
             String token = authHeader.substring(7);
 
             if (jwtUtil.validateToken(token)) {
-
+                String userId = jwtUtil.extractUserId(token);
                 String username = jwtUtil.extractUsername(token);
                 List<String> authorities = jwtUtil.extractAuthorities(token);
 
@@ -45,9 +42,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 .map(SimpleGrantedAuthority::new)
                                 .collect(Collectors.toList());
 
+                UserPrincipal principal = new UserPrincipal(userId, username);
+
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
-                                username,
+                                principal,
                                 null,
                                 grantedAuthorities
                         );

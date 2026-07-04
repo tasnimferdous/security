@@ -28,6 +28,7 @@ public class JwtUtil {
 
         return Jwts.builder()
                 .subject(userInfo.getUsername())
+                .claim("userId", userInfo.getId())
                 .claim("authorities", authorities)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
@@ -35,12 +36,16 @@ public class JwtUtil {
                 .compact();
     }
 
+    public String extractUserId(String token) {
+        return extractClaims(token).get("userId", String.class);
+    }
+
     public String extractUsername(String token) {
-        return getClaims(token).getSubject();
+        return extractClaims(token).getSubject();
     }
 
     public List<String> extractAuthorities(String token) {
-        List<?> authorities = getClaims(token).get("authorities", List.class);
+        List<?> authorities = extractClaims(token).get("authorities", List.class);
         return authorities != null
             ? authorities.stream()
                 .map(Object::toString)
@@ -49,7 +54,7 @@ public class JwtUtil {
     }
 
 
-    private Claims getClaims(String token) {
+    private Claims extractClaims(String token) {
         return Jwts.parser()
                 .verifyWith(SECRET_KEY)
                 .build()
@@ -62,6 +67,6 @@ public class JwtUtil {
     }
 
     private boolean isTokenExpired(String token) {
-        return getClaims(token).getExpiration().before(new Date());
+        return extractClaims(token).getExpiration().before(new Date());
     }
 }
