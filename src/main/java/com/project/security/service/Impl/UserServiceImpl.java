@@ -8,6 +8,8 @@ import com.project.security.entity.UserInfo;
 import com.project.security.repository.UserDetailsRepository;
 import com.project.security.service.RoleRightService;
 import com.project.security.service.UserService;
+import com.tasnim.commonlibrary.exceptions.BadRequestException;
+import com.tasnim.commonlibrary.exceptions.ForbiddenException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,38 +34,53 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto registerUser(UserRequestDto userRequestDto) {
-        if(userRequestDto.getRoles() == null || userRequestDto.getRoles().isEmpty()) {
-            throw new RuntimeException("Role is required for user registration");
+        log.info("Request received to register user: {}", userRequestDto);
+
+        validateUser(userRequestDto);
+        Set<Roles> roles = roleRightService.getRolesByIds(userRequestDto.getRoles());
+
+        if(roles.stream().anyMatch(r -> r.getName().equalsIgnoreCase("admin"))) {
+            throw new ForbiddenException(
+                    "Admin role cannot be assigned to an user");
         }
-        if(userDetailsRepository.findByUsername(userRequestDto.getUsername()).isPresent()){
-            throw new RuntimeException("Username already exists: " + userRequestDto.getUsername());
+
+        return processRegistration(userRequestDto, roles);
+    }
+
+    @Override
+    public UserResponseDto registerAdmin(UserRequestDto userRequestDto) {
+        log.info("Request received to register admin: {}", userRequestDto);
+
+        validateUser(userRequestDto);
+        Set<Roles> roles = roleRightService.getRolesByIds(userRequestDto.getRoles());
+        return processRegistration(userRequestDto, roles);
+    }
+
+    private void validateUser(UserRequestDto userRequestDto) {
+        if(userDetailsRepository.existsByUsername(userRequestDto.getUsername())){
+            throw new BadRequestException("Username already exists: " + userRequestDto.getUsername());
         }
+    }
 
-        try {
-            Set<Roles> roles = roleRightService.getRolesByIds(userRequestDto.getRoles());
+    private UserResponseDto processRegistration(UserRequestDto userRequestDto, Set<Roles> roles) {
+        UserInfo user = UserInfo.builder()
+                .id(UUID.randomUUID().toString())
+                .username(userRequestDto.getUsername())
+                .password(passwordEncoder.encode(userRequestDto.getPassword()))
+                .role(roles)
+                .build();
+        UserInfo savedUser = userDetailsRepository.save(user);
+        log.info("Registration complete: {}", savedUser.getUsername());
 
-            UserInfo user = UserInfo.builder()
-                    .id(UUID.randomUUID().toString())
-                    .username(userRequestDto.getUsername())
-                    .password(passwordEncoder.encode(userRequestDto.getPassword()))
-                    .role(roles)
-                    .build();
-            UserInfo savedUser = userDetailsRepository.save(user);
-            log.info("User registered successfully: {}", savedUser.getUsername());
+        //publish event to Kafka
+        userRequestDto.setUserId(savedUser.getId());
+        userRequestDto.setPassword(null);
+        userPublisher.publishUserInfo(userRequestDto);
 
-            //publish event to Kafka
-            userRequestDto.setUserId(savedUser.getId());
-            userRequestDto.setPassword(null);
-            userPublisher.publishUserInfo(userRequestDto);
-
-            return UserResponseDto.builder()
-                    .id(savedUser.getId())
-                    .username(savedUser.getUsername())
-                    .role(roles.stream().map(Roles::getName).toList())
-                    .build();
-        }catch (Exception e){
-            log.error("Failed to register user: ", e);
-            throw new RuntimeException(e.getMessage());
-        }
+        return UserResponseDto.builder()
+                .id(savedUser.getId())
+                .username(savedUser.getUsername())
+                .role(roles.stream().map(Roles::getName).toList())
+                .build();
     }
 }

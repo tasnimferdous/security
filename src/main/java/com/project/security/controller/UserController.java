@@ -1,18 +1,19 @@
 package com.project.security.controller;
 
 import com.project.security.request.UserRequestDto;
+import com.project.security.response.UserResponseDto;
 import com.project.security.service.UserService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
+import com.tasnim.commonlibrary.model.CommonResponse;
+import com.tasnim.commonlibrary.utils.ResponseUtil;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
-@Slf4j
+@RequestMapping("/api/v1/register")
 public class UserController {
     private final UserService userService;
 
@@ -20,16 +21,16 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/user/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserRequestDto userRequestDto){
-        log.info("Request received to register user: {}", userRequestDto);
-        userRequestDto.setRoles(List.of(2));
-        return ResponseEntity.ok(userService.registerUser(userRequestDto));
+    @PostMapping("/user")
+    public CommonResponse<UserResponseDto> registerUser(@RequestBody @Valid UserRequestDto userRequestDto){
+        UserResponseDto response = userService.registerUser(userRequestDto);
+        return ResponseUtil.success(response, "Registration completed successfully");
     }
 
-    @PostMapping("/admin/register")
+    @PostMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> registerAdmin(@RequestBody UserRequestDto userRequestDto){
-        return ResponseEntity.ok(userService.registerUser(userRequestDto));
+    public CommonResponse<UserResponseDto> registerAdmin(@RequestBody @Valid UserRequestDto userRequestDto){
+        UserResponseDto response = userService.registerAdmin(userRequestDto);
+        return ResponseUtil.success(response, "Registration completed successfully");
     }
 }

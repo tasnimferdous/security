@@ -18,4 +18,6 @@ public interface UserDetailsRepository extends JpaRepository<UserInfo, String> {
         where u.username = :username
     """)
     Optional<UserInfo> findByUsername(@Param("username") String username);
+
+    boolean existsByUsername(String username);
 }
