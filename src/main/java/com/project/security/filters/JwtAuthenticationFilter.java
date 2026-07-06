@@ -1,7 +1,7 @@
 package com.project.security.filters;
 
-import com.project.security.model.UserPrincipal;
 import com.project.security.utils.JwtUtil;
+import com.tasnim.commonlibrary.model.UserPrincipal;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

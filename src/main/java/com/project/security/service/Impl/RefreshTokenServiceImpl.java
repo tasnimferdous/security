@@ -5,6 +5,7 @@ import com.project.security.entity.UserInfo;
 import com.project.security.repository.TokenRepository;
 import com.project.security.service.CustomUserDetailsService;
 import com.project.security.service.RefreshTokenService;
+import com.tasnim.commonlibrary.exceptions.UnauthorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -47,7 +48,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
         if (token.getExpiryDate().isBefore(Instant.now())) {
             log.warn("Refresh token expired: {}", token.getToken());
-            throw new RuntimeException("Refresh token expired. Please login again.");
+            throw new UnauthorizedException("Refresh token expired. Please login again.");
         }
         return token;
     }

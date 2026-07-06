@@ -1,6 +1,5 @@
 package com.project.security.service;
 
-import com.project.security.entity.UserInfo;
 import com.project.security.repository.UserDetailsRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +16,6 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         log.info("CustomUserDetailsService - loadUserByUsername - username: {}", username);
-        return userDetailsRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
-    }
-
-    public UserInfo findUserByUsername(String username) throws UsernameNotFoundException {
-        log.info("CustomUserDetailsService - findUserByUsername - username: {}", username);
         return userDetailsRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }

@@ -5,4 +5,6 @@ import com.project.security.response.UserResponseDto;
 
 public interface UserService {
     UserResponseDto registerUser(UserRequestDto userRequestDto);
+
+    UserResponseDto registerAdmin(UserRequestDto userRequestDto);
 }

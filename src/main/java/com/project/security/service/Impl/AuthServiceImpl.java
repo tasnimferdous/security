@@ -7,6 +7,7 @@ import com.project.security.response.AuthResponseDto;
 import com.project.security.service.AuthService;
 import com.project.security.service.RefreshTokenService;
 import com.project.security.utils.JwtUtil;
+import com.tasnim.commonlibrary.exceptions.UnauthorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,33 +29,25 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponseDto getToken(AuthRequestDto authRequestDto) {
         log.info("AuthServiceImpl - Generating token for user: {}", authRequestDto.getUsername());
 
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authRequestDto.getUsername(), authRequestDto.getPassword())
-            );
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(authRequestDto.getUsername(), authRequestDto.getPassword())
+        );
 
-            if (authentication.isAuthenticated()) {
-                log.info("User authenticated successfully: {}", authRequestDto.getUsername());
-            } else {
-                log.warn("Authentication failed for user: {}", authRequestDto.getUsername());
-                throw new RuntimeException("Invalid username or password");
-            }
+        log.info("User authenticated successfully: {}", authRequestDto.getUsername());
 
-            UserInfo userDetails = (UserInfo) authentication.getPrincipal();
-
-            assert userDetails != null;
-            String accessToken = jwtUtil.generateToken(userDetails);
-            RefreshToken refreshToken = refreshTokenService.generateToken(userDetails);
-
-            return AuthResponseDto.builder()
-                    .accessToken(accessToken)
-                    .refreshToken(refreshToken.getToken())
-                    .build();
-
-        }catch (Exception e){
-            log.error("Exception - ",e);
-            throw new RuntimeException(e.getMessage());
+        UserInfo userDetails = (UserInfo) authentication.getPrincipal();
+        if (userDetails == null) {
+            log.error("UserDetails is null after authentication for user: {}", authRequestDto.getUsername());
+            throw new UnauthorizedException("User details not found after authentication");
         }
+
+        String accessToken = jwtUtil.generateToken(userDetails);
+        RefreshToken refreshToken = refreshTokenService.generateToken(userDetails);
+
+        return AuthResponseDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken.getToken())
+                .build();
     }
 
     @Override
@@ -69,6 +62,6 @@ public class AuthServiceImpl implements AuthService {
                             .refreshToken(refreshToken)
                             .build();
                 })
-                .orElseThrow(() -> new RuntimeException("Invalid refresh refreshToken. Please login again."));
+                .orElseThrow(() -> new UnauthorizedException("Invalid refresh refreshToken. Please login again."));
     }
 }
