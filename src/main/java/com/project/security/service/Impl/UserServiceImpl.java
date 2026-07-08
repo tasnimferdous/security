@@ -13,12 +13,14 @@ import com.tasnim.commonlibrary.exceptions.ForbiddenException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 import java.util.UUID;
 
 @Service
 @Slf4j
+@Transactional
 public class UserServiceImpl implements UserService {
     private final UserDetailsRepository userDetailsRepository;
     private final PasswordEncoder passwordEncoder;
